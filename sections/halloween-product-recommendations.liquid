@@ -1,0 +1,224 @@
+{% comment %}Halloween themed product recommendations{% endcomment %}
+{{ 'section-halloween-product-recommendations.css' | asset_url | stylesheet_tag }}
+
+{%- if recommendations.performed and recommendations.products_count > 0 -%}
+  <div class="halloween-recommendations-section page-width">
+    <div class="halloween-recommendations-header">
+      <h2 class="halloween-recommendations-title">
+        {{ section.settings.heading | default: '万圣节推荐商品 🎃' }}
+      </h2>
+      <div class="halloween-recommendations-decoration">
+        <span class="halloween-decoration-item">🦇</span>
+        <span class="halloween-decoration-item">👻</span>
+        <span class="halloween-decoration-item">🕷️</span>
+      </div>
+    </div>
+    
+    <div class="halloween-recommendations-grid">
+      {%- for product in recommendations.products limit: section.settings.products_to_show -%}
+        <div class="halloween-product-card">
+          <div class="halloween-product-card-inner">
+            <div class="halloween-product-image">
+              {%- if product.featured_media -%}
+                <a href="{{ product.url }}" class="halloween-product-link">
+                  <img
+                    srcset="{%- if product.featured_media.width >= 165 -%}{{ product.featured_media | img_url: '165x' }} 165w,{%- endif -%}
+                            {%- if product.featured_media.width >= 360 -%}{{ product.featured_media | img_url: '360x' }} 360w,{%- endif -%}
+                            {%- if product.featured_media.width >= 533 -%}{{ product.featured_media | img_url: '533x' }} 533w,{%- endif -%}
+                            {%- if product.featured_media.width >= 720 -%}{{ product.featured_media | img_url: '720x' }} 720w,{%- endif -%}
+                            {%- if product.featured_media.width >= 940 -%}{{ product.featured_media | img_url: '940x' }} 940w,{%- endif -%}
+                            {%- if product.featured_media.width >= 1066 -%}{{ product.featured_media | img_url: '1066x' }} 1066w{%- endif -%}"
+                    src="{{ product.featured_media | img_url: '533x' }}"
+                    sizes="(min-width: 1100px) 267px, (min-width: 750px) calc((100vw - 10rem) / 4), calc((100vw - 3rem) / 2)"
+                    alt="{{ product.featured_media.alt | escape }}"
+                    loading="lazy"
+                    class="halloween-product-img"
+                    width="{{ product.featured_media.width }}"
+                    height="{{ product.featured_media.height }}"
+                  >
+                </a>
+              {%- else -%}
+                <div class="halloween-product-placeholder">
+                  <span class="halloween-placeholder-icon">🎃</span>
+                </div>
+              {%- endif -%}
+              
+              <div class="halloween-product-overlay">
+                <div class="halloween-quick-view">
+                  <a href="{{ product.url }}" class="halloween-quick-view-btn">
+                    <span class="halloween-quick-view-text">快速查看</span>
+                    <span class="halloween-quick-view-icon">👁️</span>
+                  </a>
+                </div>
+              </div>
+              
+              {%- if product.compare_at_price > product.price -%}
+                <div class="halloween-sale-badge">
+                  <span class="halloween-sale-text">特惠</span>
+                  <span class="halloween-sale-icon">🔥</span>
+                </div>
+              {%- endif -%}
+            </div>
+            
+            <div class="halloween-product-info">
+              <h3 class="halloween-product-title">
+                <a href="{{ product.url }}" class="halloween-product-title-link">
+                  {{ product.title | escape }}
+                </a>
+              </h3>
+              
+              <div class="halloween-product-vendor">
+                {{ product.vendor | escape }}
+              </div>
+              
+              <div class="halloween-product-price">
+                {%- if product.price_varies -%}
+                  <span class="halloween-price-from">从</span>
+                {%- endif -%}
+                <span class="halloween-price-current">
+                  {{ product.price | money }}
+                </span>
+                {%- if product.compare_at_price > product.price -%}
+                  <span class="halloween-price-compare">
+                    {{ product.compare_at_price | money }}
+                  </span>
+                {%- endif -%}
+              </div>
+              
+              <div class="halloween-product-rating">
+                {%- assign rating = product.metafields.reviews.rating.value | default: 4.5 -%}
+                <div class="halloween-stars">
+                  {%- for i in (1..5) -%}
+                    {%- if i <= rating -%}
+                      <span class="halloween-star halloween-star-filled">⭐</span>
+                    {%- else -%}
+                      <span class="halloween-star">☆</span>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+                <span class="halloween-rating-count">({{ product.metafields.reviews.rating_count.value | default: 42 }})</span>
+              </div>
+              
+              <div class="halloween-product-actions">
+                <form action="/cart/add" method="post" enctype="multipart/form-data" class="halloween-add-to-cart-form">
+                  <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="halloween-add-to-cart-btn" 
+                          {% unless product.available %}disabled{% endunless %}>
+                    {%- if product.available -%}
+                      <span class="halloween-btn-text">加入购物车</span>
+                      <span class="halloween-btn-icon">🛒</span>
+                    {%- else -%}
+                      <span class="halloween-btn-text">售罄</span>
+                      <span class="halloween-btn-icon">😱</span>
+                    {%- endif -%}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+    
+    <div class="halloween-recommendations-footer">
+      <a href="{{ routes.collections_url }}" class="halloween-view-all-btn">
+        <span class="halloween-view-all-text">查看更多万圣节商品</span>
+        <span class="halloween-view-all-icon">🎃</span>
+      </a>
+    </div>
+  </div>
+{%- endif -%}
+
+<script>
+  // Initialize product recommendations
+  const productId = {{ product.id | json }};
+  const sectionId = {{ section.id | json }};
+  const limit = {{ section.settings.products_to_show | default: 4 }};
+  
+  fetch(`${window.Shopify.routes.root}recommendations/products?section_id=${sectionId}&product_id=${productId}&limit=${limit}`)
+    .then(response => response.text())
+    .then(text => {
+      const html = document.createElement('div');
+      html.innerHTML = text;
+      const recommendations = html.querySelector('.halloween-recommendations-section');
+      
+      if (recommendations && recommendations.innerHTML.trim().length) {
+        document.querySelector(`#shopify-section-${sectionId}`).innerHTML = recommendations.outerHTML;
+        
+        // Add Halloween animations
+        addHalloweenRecommendationAnimations();
+      }
+    })
+    .catch(e => {
+      console.error('Error loading product recommendations:', e);
+    });
+    
+  function addHalloweenRecommendationAnimations() {
+    // Animate decoration items
+    const decorationItems = document.querySelectorAll('.halloween-decoration-item');
+    decorationItems.forEach((item, index) => {
+      item.style.animationDelay = `${index * 0.5}s`;
+      item.style.animation = 'float 3s ease-in-out infinite';
+    });
+    
+    // Animate product cards on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animation = 'slideInUp 0.6s ease-out forwards';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    
+    const productCards = document.querySelectorAll('.halloween-product-card');
+    productCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.animationDelay = `${index * 0.1}s`;
+      observer.observe(card);
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "万圣节产品推荐",
+  "tag": "section",
+  "class": "halloween-recommendations-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "万圣节推荐商品 🎃",
+      "label": "标题"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "label": "显示产品数量"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "default": "#1a1a1a",
+      "label": "背景颜色"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "default": "#FF6B35",
+      "label": "文字颜色"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,692 @@
+{% comment %}Halloween themed product page{% endcomment %}
+{{ 'section-main-product-halloween.css' | asset_url | stylesheet_tag }}
+{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
+{{ 'component-badge.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-rte.css' | asset_url | stylesheet_tag }}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+
+<link rel="stylesheet" href="{{ 'component-cart-notification.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'component-deferred-media.css' | asset_url }}" media="print" onload="this.media='all'">
+
+{%- assign first_3d_model = product.media | where: "media_type", "model" | first -%}
+{%- if first_3d_model -%}
+  {{ 'component-product-model.css' | asset_url | stylesheet_tag }}
+  <link id="ModelViewerStyle" rel="stylesheet" href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css" media="print" onload="this.media='all'">
+  <link id="ModelViewerOverride" rel="stylesheet" href="{{ 'component-model-viewer-ui.css' | asset_url }}" media="print" onload="this.media='all'">
+{%- endif -%}
+
+<div class="halloween-background">
+  <div class="halloween-spiders">
+    <div class="spider spider-1">🕷️</div>
+    <div class="spider spider-2">🕷️</div>
+    <div class="spider spider-3">🕷️</div>
+  </div>
+  
+  <div class="halloween-bats">
+    <div class="bat bat-1">🦇</div>
+    <div class="bat bat-2">🦇</div>
+    <div class="bat bat-3">🦇</div>
+  </div>
+</div>
+
+<section class="page-width halloween-product-section">
+  <div class="product grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %} halloween-grid">
+    <div class="grid__item product__media-wrapper halloween-media-wrapper">
+      <div class="halloween-frame">
+        <slider-component class="slider-mobile-gutter">
+          <a class="skip-to-content-link button visually-hidden" href="#ProductInfo-{{ section.id }}">
+            {{ "accessibility.skip_to_product_info" | t }}
+          </a>
+          <ul class="product__media-list grid grid--peek list-unstyled slider slider--mobile" role="list">
+            {%- if product.selected_or_first_available_variant.featured_media != null -%}
+              {%- assign media = product.selected_or_first_available_variant.featured_media -%}
+              <li class="product__media-item grid__item slider__slide{% if media.media_type != 'image' %} product__media-item--full{% endif %}" data-media-id="{{ section.id }}-{{ media.id }}">
+                {% render 'product-thumbnail', media: media, position: 'featured', loop: section.settings.enable_video_looping, modal_id: section.id %}
+              </li>
+            {%- endif -%}
+            {%- for media in product.media -%}
+              {%- unless media.id == product.selected_or_first_available_variant.featured_media.id -%}
+                <li class="product__media-item grid__item slider__slide{% if media.media_type != 'image' %} product__media-item--full{% endif %}" data-media-id="{{ section.id }}-{{ media.id }}">
+                  {% render 'product-thumbnail', media: media, position: forloop.index, loop: section.settings.enable_video_looping, modal_id: section.id %}
+                </li>
+              {%- endunless -%}
+            {%- endfor -%}
+          </ul>
+          <div class="slider-buttons slider-buttons--overlay no-js-hidden{% if product.media.size < 2 %} small-hide{% endif %}">
+            <div class="slider-counter caption halloween-counter">
+              <span class="slider-counter--current">1</span>
+              <span aria-hidden="true"> / </span>
+              <span class="visually-hidden">{{ 'accessibility.of' | t }}</span>
+              <span class="slider-counter--total">{{ product.media.size }}</span>
+            </div>
+            <button type="button" class="slider-button slider-button--prev halloween-nav-btn" name="previous" aria-label="{{ 'accessibility.previous_slide' | t }}">{% render 'icon-caret' %}</button>
+            <button type="button" class="slider-button slider-button--next halloween-nav-btn" name="next" aria-label="{{ 'accessibility.next_slide' | t }}">{% render 'icon-caret' %}</button>
+          </div>
+        </slider-component>
+      </div>
+      
+      {%- if first_3d_model -%}
+        <button
+          class="button button--full-width product__xr-button halloween-xr-button"
+          type="button"
+          aria-label="{{ 'products.product.xr_button_label' | t }}"
+          data-shopify-xr
+          data-shopify-model3d-id="{{ first_3d_model.id }}"
+          data-shopify-title="{{ product.title | escape }}"
+          data-shopify-xr-hidden
+        >
+          {% render 'icon-3d-model' %}
+          {{ 'products.product.xr_button' | t }}
+        </button>
+      {%- endif -%}
+    </div>
+    
+    <div class="product__info-wrapper grid__item halloween-info-wrapper">
+      <div id="ProductInfo-{{ section.id }}" class="product__info-container halloween-info-container{% if section.settings.enable_sticky_info %} product__info-container--sticky{% endif %}">
+        {%- assign product_form_id = 'product-form-' | append: section.id -%}
+
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+          {%- when '@app' -%}
+            {% render block %}
+          
+          {%- when 'halloween_banner' -%}
+            <div class="halloween-banner" {{ block.shopify_attributes }}>
+              <div class="halloween-banner-content">
+                <h2 class="halloween-banner-title">{{ block.settings.banner_text }}</h2>
+                <p class="halloween-banner-subtitle">{{ block.settings.banner_subtext }}</p>
+                {%- if block.settings.show_countdown -%}
+                  <div class="halloween-countdown" id="halloween-countdown">
+                    <div class="countdown-item">
+                      <span class="countdown-number" id="days">00</span>
+                      <span class="countdown-label">天</span>
+                    </div>
+                    <div class="countdown-item">
+                      <span class="countdown-number" id="hours">00</span>
+                      <span class="countdown-label">时</span>
+                    </div>
+                    <div class="countdown-item">
+                      <span class="countdown-number" id="minutes">00</span>
+                      <span class="countdown-label">分</span>
+                    </div>
+                    <div class="countdown-item">
+                      <span class="countdown-number" id="seconds">00</span>
+                      <span class="countdown-label">秒</span>
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+              <div class="halloween-banner-decoration">
+                <span class="pumpkin-decoration">🎃</span>
+                <span class="ghost-decoration">👻</span>
+              </div>
+            </div>
+            
+          {%- when 'text' -%}
+            <p class="product__text halloween-text{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}" {{ block.shopify_attributes }}>
+              {{- block.settings.text -}}
+            </p>
+            
+          {%- when 'title' -%}
+            <h1 class="product__title halloween-title" {{ block.shopify_attributes }}>
+              {{ product.title | escape }}
+            </h1>
+            
+          {%- when 'halloween_badge' -%}
+            <div class="halloween-badge {{ block.settings.badge_style }}" {{ block.shopify_attributes }}>
+              <span class="halloween-badge-text">{{ block.settings.badge_text }}</span>
+              <span class="halloween-badge-icon">🎃</span>
+            </div>
+            
+          {%- when 'price' -%}
+            <div class="no-js-hidden halloween-price-wrapper" id="price-{{ section.id }}" {{ block.shopify_attributes }}>
+              {%- render 'price', product: product, use_variant: true, show_badges: true, price_class: 'price--large halloween-price' -%}
+            </div>
+            <div {{ block.shopify_attributes }}>
+              {%- form 'product', product, id: 'product-form-installment', class: 'installment caption-large halloween-installment' -%}
+                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                {{ form | payment_terms }}
+              {%- endform -%}
+            </div>
+            
+          {%- when 'halloween_discount' -%}
+            <div class="halloween-discount" {{ block.shopify_attributes }}>
+              <div class="halloween-discount-content">
+                <span class="halloween-discount-text">{{ block.settings.discount_text }}</span>
+                <span class="halloween-discount-percentage">{{ block.settings.discount_percentage }}% OFF</span>
+                {%- if block.settings.show_ghost_animation -%}
+                  <span class="halloween-ghost-float">👻</span>
+                {%- endif -%}
+              </div>
+            </div>
+            
+          {%- when 'description' -%}
+            {%- if product.description != blank -%}
+              <div class="product__description rte halloween-description">
+                {{ product.description }}
+              </div>
+            {%- endif -%}
+            
+          {%- when 'quantity_selector' -%}
+            <div class="product-form__input product-form__quantity halloween-quantity" {{ block.shopify_attributes }}>
+              <label class="form__label halloween-label" for="Quantity-{{ section.id }}">
+                {{ 'products.product.quantity.label' | t }}
+              </label>
+              <quantity-input class="quantity halloween-quantity-input">
+                <button class="quantity__button no-js-hidden halloween-qty-btn" name="minus" type="button">
+                  <span class="visually-hidden">{{ 'products.product.quantity.decrease' | t: product: product.title | escape }}</span>
+                  {% render 'icon-minus' %}
+                </button>
+                <input class="quantity__input halloween-qty-input"
+                    type="number"
+                    name="quantity"
+                    id="Quantity-{{ section.id }}"
+                    min="1"
+                    value="1"
+                    form="product-form-{{ section.id }}"
+                  >
+                <button class="quantity__button no-js-hidden halloween-qty-btn" name="plus" type="button">
+                  <span class="visually-hidden">{{ 'products.product.quantity.increase' | t: product: product.title | escape }}</span>
+                  {% render 'icon-plus' %}
+                </button>
+              </quantity-input>
+            </div>
+            
+          {%- when 'variant_picker' -%}
+            {%- unless product.has_only_default_variant -%}
+              {%- if block.settings.picker_type == 'button' -%}
+                <variant-radios class="no-js-hidden halloween-variant-radios" data-section="{{ section.id }}" data-url="{{ product.url }}" {{ block.shopify_attributes }}>
+                  {%- for option in product.options_with_values -%}
+                      <fieldset class="js product-form__input halloween-variant-fieldset">
+                        <legend class="form__label halloween-variant-legend">{{ option.name }}</legend>
+                        {%- for value in option.values -%}
+                          <input type="radio" id="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}"
+                                name="{{ option.name }}"
+                                value="{{ value | escape }}"
+                                form="product-form-{{ section.id }}"
+                                {% if option.selected_value == value %}checked{% endif %}
+                                class="halloween-variant-radio"
+                          >
+                          <label for="{{ section.id }}-{{ option.name }}-{{ forloop.index0 }}" class="halloween-variant-label">
+                            {{ value }}
+                          </label>
+                        {%- endfor -%}
+                      </fieldset>
+                  {%- endfor -%}
+                  <script type="application/json">
+                    {{ product.variants | json }}
+                  </script>
+                </variant-radios>
+              {%- else -%}
+                <variant-selects class="no-js-hidden halloween-variant-selects" data-section="{{ section.id }}" data-url="{{ product.url }}" {{ block.shopify_attributes }}>
+                  {%- for option in product.options_with_values -%}
+                    <div class="product-form__input product-form__input--dropdown halloween-variant-dropdown">
+                      <label class="form__label halloween-variant-label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
+                        {{ option.name }}
+                      </label>
+                      <div class="select halloween-select">
+                        <select id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                          class="select__select halloween-select-input"
+                          name="options[{{ option.name | escape }}]"
+                          form="product-form-{{ section.id }}"
+                        >
+                          {%- for value in option.values -%}
+                            <option value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
+                              {{ value }}
+                            </option>
+                          {%- endfor -%}
+                        </select>
+                        {% render 'icon-caret' %}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+
+                  <script type="application/json">
+                    {{ product.variants | json }}
+                  </script>
+                </variant-selects>
+              {%- endif -%}
+            {%- endunless -%}
+
+            <noscript>
+              <div class="product-form__input{% if product.has_only_default_variant %} hidden{% endif %}">
+                <label class="form__label" for="Variants-{{ section.id }}">{{ 'products.product.product_variants' | t }}</label>
+                <div class="select">
+                  <select name="id" id="Variants-{{ section.id }}" class="select__select" form="product-form">
+                    {%- for variant in product.variants -%}
+                      <option
+                        {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
+                        {% if variant.available == false %}disabled{% endif %}
+                        value="{{ variant.id }}"
+                      >
+                        {{ variant.title }}
+                        {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}
+                        - {{ variant.price | money | strip_html }}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                  {% render 'icon-caret' %}
+                </div>
+              </div>
+            </noscript>
+            
+          {%- when 'buy_buttons' -%}
+            <div class="halloween-buy-section" {{ block.shopify_attributes }}>
+              <product-form class="product-form">
+                {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+                  <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                  <div class="product-form__buttons halloween-buttons">
+                    <button
+                      type="submit"
+                      name="add"
+                      class="product-form__submit button button--full-width halloween-buy-button {% if block.settings.show_dynamic_checkout and product.selling_plan_groups == empty %}button--secondary{% else %}button--primary{% endif %}"
+                    {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}
+                    >
+                        {%- if product.selected_or_first_available_variant.available -%}
+                          {{ block.settings.button_text | default: 'products.product.add_to_cart' | t }}
+                        {%- else -%}
+                          {{ 'products.product.sold_out' | t }}
+                        {%- endif -%}
+                    </button>
+                    {%- if block.settings.show_dynamic_checkout -%}
+                      {{ form | payment_button }}
+                    {%- endif -%}
+                  </div>
+                {%- endform -%}
+              </product-form>
+            </div>
+            
+          {%- when 'halloween_guarantee' -%}
+            <div class="halloween-guarantee" {{ block.shopify_attributes }}>
+              <div class="halloween-guarantee-content">
+                <h3 class="halloween-guarantee-title">{{ block.settings.guarantee_text }}</h3>
+                <p class="halloween-guarantee-details">{{ block.settings.guarantee_details }}</p>
+                <div class="halloween-guarantee-icon">🛡️</div>
+              </div>
+            </div>
+            
+          {%- when 'halloween_features' -%}
+            <div class="halloween-features" {{ block.shopify_attributes }}>
+              <div class="halloween-features-list">
+                <div class="halloween-feature-item">{{ block.settings.feature_1 }}</div>
+                <div class="halloween-feature-item">{{ block.settings.feature_2 }}</div>
+                <div class="halloween-feature-item">{{ block.settings.feature_3 }}</div>
+              </div>
+            </div>
+            
+          {%- when 'share' -%}
+            <share-button class="share-button halloween-share" {{ block.shopify_attributes }}>
+              <button class="share-button__button button button--tertiary halloween-share-btn hidden">
+                {% render 'icon-share' %}
+                {{ 'general.share.share' | t }}
+              </button>
+              <details>
+                <summary class="share-button__button button button--tertiary halloween-share-btn">
+                  {% render 'icon-share' %}
+                  {{ 'general.share.share' | t }}
+                </summary>
+                <div class="share-button__fallback halloween-share-fallback">
+                  <div class="field">
+                    <input type="text"
+                          class="field__input halloween-share-input"
+                          id="url"
+                          value="{{ shop.url | append: product.url }}"
+                          placeholder="{{ 'general.share.share_url' | t }}"
+                          onclick="this.select();"
+                          readonly
+                    >
+                    <label class="field__label" for="url">{{ 'general.share.share_url' | t }}</label>
+                  </div>
+                  <button class="button button--tertiary halloween-copy-btn">
+                    {% render 'icon-clipboard' %}
+                    {{ 'general.share.copy_to_clipboard' | t }}
+                  </button>
+                  <span id="ShareMessage-{{ section.id }}" class="share-button__message hidden" role="status" aria-hidden="true">
+                    {{ 'general.share.success_message' | t }}
+                  </span>
+                </div>
+              </details>
+            </share-button>
+            <script src="{{ 'share.js' | asset_url }}" defer="defer"></script>
+            
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- render 'cart-notification' -%}
+</section>
+
+{% javascript %}
+  // Halloween countdown timer
+  function startHalloweenCountdown() {
+    const countdownElement = document.getElementById('halloween-countdown');
+    if (!countdownElement) return;
+    
+    // Set Halloween date (October 31st)
+    const currentYear = new Date().getFullYear();
+    let halloweenDate = new Date(currentYear, 9, 31, 23, 59, 59); // October 31st
+    
+    // If Halloween has passed this year, set it for next year
+    if (new Date() > halloweenDate) {
+      halloweenDate = new Date(currentYear + 1, 9, 31, 23, 59, 59);
+    }
+    
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = halloweenDate.getTime() - now;
+      
+      if (distance < 0) {
+        countdownElement.innerHTML = '<div class="countdown-expired">万圣节活动已结束！</div>';
+        return;
+      }
+      
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      
+      document.getElementById('days').textContent = days.toString().padStart(2, '0');
+      document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+      document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+      document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+    }
+    
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+  
+  // Start countdown when page loads
+  document.addEventListener('DOMContentLoaded', startHalloweenCountdown);
+  
+  // Halloween animations
+  function addHalloweenAnimations() {
+    // Floating ghosts animation
+    const ghosts = document.querySelectorAll('.halloween-ghost-float');
+    ghosts.forEach(ghost => {
+      ghost.style.animation = 'float 3s ease-in-out infinite';
+    });
+    
+    // Pumpkin pulse animation
+    const pumpkins = document.querySelectorAll('.pumpkin-decoration');
+    pumpkins.forEach(pumpkin => {
+      pumpkin.style.animation = 'pulse 2s ease-in-out infinite';
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', addHalloweenAnimations);
+{% endjavascript %}
+
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
+{%- if first_3d_model -%}
+  <script type="application/json" id="ProductJSON-{{ product.id }}">
+    {{ product.media | where: 'media_type', 'model' | json }}
+  </script>
+  <script src="{{ 'product-model.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "万圣节产品页面",
+  "tag": "section",
+  "class": "halloween-product-section spaced-section",
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "halloween_banner",
+      "name": "万圣节横幅",
+      "settings": [
+        {
+          "type": "text",
+          "id": "banner_text",
+          "default": "🎃 万圣节特惠 🎃",
+          "label": "横幅标题"
+        },
+        {
+          "type": "text",
+          "id": "banner_subtext",
+          "default": "恐怖优惠，限时抢购！",
+          "label": "横幅副标题"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_countdown",
+          "default": true,
+          "label": "显示倒计时"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "文本",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "default": "Text block",
+          "label": "文本内容"
+        },
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            {
+              "value": "body",
+              "label": "正文"
+            },
+            {
+              "value": "subtitle",
+              "label": "副标题"
+            },
+            {
+              "value": "uppercase",
+              "label": "大写"
+            }
+          ],
+          "default": "body",
+          "label": "文本样式"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "产品标题",
+      "limit": 1
+    },
+    {
+      "type": "halloween_badge",
+      "name": "万圣节徽章",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge_text",
+          "default": "万圣节限定",
+          "label": "徽章文本"
+        },
+        {
+          "type": "select",
+          "id": "badge_style",
+          "options": [
+            {
+              "value": "pumpkin",
+              "label": "南瓜样式"
+            },
+            {
+              "value": "ghost",
+              "label": "幽灵样式"
+            },
+            {
+              "value": "bat",
+              "label": "蝙蝠样式"
+            }
+          ],
+          "default": "pumpkin",
+          "label": "徽章样式"
+        }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "价格",
+      "limit": 1
+    },
+    {
+      "type": "halloween_discount",
+      "name": "万圣节折扣",
+      "settings": [
+        {
+          "type": "text",
+          "id": "discount_text",
+          "default": "万圣节专享折扣",
+          "label": "折扣文本"
+        },
+        {
+          "type": "text",
+          "id": "discount_percentage",
+          "default": "20",
+          "label": "折扣百分比"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_ghost_animation",
+          "default": true,
+          "label": "显示幽灵动画"
+        }
+      ]
+    },
+    {
+      "type": "quantity_selector",
+      "name": "数量选择器",
+      "limit": 1
+    },
+    {
+      "type": "variant_picker",
+      "name": "变体选择器",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "picker_type",
+          "options": [
+            {
+              "value": "dropdown",
+              "label": "下拉菜单"
+            },
+            {
+              "value": "button",
+              "label": "按钮"
+            }
+          ],
+          "default": "button",
+          "label": "选择器类型"
+        }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "购买按钮",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "default": "立即抢购 👻",
+          "label": "按钮文本"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "default": true,
+          "label": "显示动态结账"
+        }
+      ]
+    },
+    {
+      "type": "halloween_guarantee",
+      "name": "万圣节保证",
+      "settings": [
+        {
+          "type": "text",
+          "id": "guarantee_text",
+          "default": "万圣节品质保证",
+          "label": "保证标题"
+        },
+        {
+          "type": "textarea",
+          "id": "guarantee_details",
+          "default": "不满意全额退款，让您购物无忧",
+          "label": "保证详情"
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "产品描述",
+      "limit": 1
+    },
+    {
+      "type": "halloween_features",
+      "name": "万圣节特色",
+      "settings": [
+        {
+          "type": "text",
+          "id": "feature_1",
+          "default": "🦇 快速发货",
+          "label": "特色1"
+        },
+        {
+          "type": "text",
+          "id": "feature_2",
+          "default": "🕷️ 品质保证",
+          "label": "特色2"
+        },
+        {
+          "type": "text",
+          "id": "feature_3",
+          "default": "🎃 专业客服",
+          "label": "特色3"
+        }
+      ]
+    },
+    {
+      "type": "share",
+      "name": "分享",
+      "limit": 1
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "万圣节设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_info",
+      "default": true,
+      "label": "启用粘性信息"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_looping",
+      "default": false,
+      "label": "启用视频循环"
+    },
+    {
+      "type": "color",
+      "id": "halloween_primary_color",
+      "default": "#FF6B35",
+      "label": "万圣节主色调"
+    },
+    {
+      "type": "color",
+      "id": "halloween_secondary_color",
+      "default": "#2D1B69",
+      "label": "万圣节辅助色"
+    }
+  ]
+}
+{% endschema %}
