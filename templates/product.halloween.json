@@ -1,0 +1,103 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product-halloween",
+      "blocks": {
+        "halloween_banner": {
+          "type": "halloween_banner",
+          "settings": {
+            "banner_text": "🎃 万圣节特惠 🎃",
+            "banner_subtext": "恐怖优惠，限时抢购！",
+            "show_countdown": true
+          }
+        },
+        "vendor": {
+          "type": "text",
+          "settings": {
+            "text_style": "uppercase",
+            "text": "{{ product.vendor }}"
+          }
+        },
+        "title": {
+          "type": "title"
+        },
+        "halloween_badge": {
+          "type": "halloween_badge",
+          "settings": {
+            "badge_text": "万圣节限定",
+            "badge_style": "pumpkin"
+          }
+        },
+        "price": {
+          "type": "price"
+        },
+        "halloween_discount": {
+          "type": "halloween_discount",
+          "settings": {
+            "discount_text": "万圣节专享折扣",
+            "discount_percentage": "20",
+            "show_ghost_animation": true
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker"
+        },
+        "quantity_selector": {
+          "type": "quantity_selector"
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "button_text": "立即抢购 👻",
+            "show_dynamic_checkout": true
+          }
+        },
+        "halloween_guarantee": {
+          "type": "halloween_guarantee",
+          "settings": {
+            "guarantee_text": "万圣节品质保证",
+            "guarantee_details": "不满意全额退款，让您购物无忧"
+          }
+        },
+        "description": {
+          "type": "description"
+        },
+        "halloween_features": {
+          "type": "halloween_features",
+          "settings": {
+            "feature_1": "🦇 快速发货",
+            "feature_2": "🕷️ 品质保证", 
+            "feature_3": "🎃 专业客服"
+          }
+        },
+        "share": {
+          "type": "share"
+        }
+      },
+      "block_order": [
+        "halloween_banner",
+        "vendor",
+        "title",
+        "halloween_badge",
+        "price",
+        "halloween_discount",Ï
+        "variant_picker",
+        "quantity_selector",
+        "buy_buttons",
+        "halloween_guarantee",
+        "description",
+        "halloween_features",
+        "share"
+      ]
+    },
+    "halloween-recommendations": {
+      "type": "halloween-product-recommendations",
+      "settings": {
+        "heading": "万圣节推荐商品 🎃",
+        "products_to_show": 4
+      }
+    }
+  },
+  "order": ["main","halloween-recommendations"
+  ]
+}
