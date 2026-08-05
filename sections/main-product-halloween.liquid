@@ -427,6 +427,10 @@
   <script src="{{ 'product-model.js' | asset_url }}" defer></script>
 {%- endif -%}
 
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
 {% schema %}
 {
   "name": "万圣节产品页面",

@@ -510,14 +510,15 @@
       "logo": {{ section.settings.logo | img_url: image_size | prepend: "https:" | json }},
     {% endif %}
     "sameAs": [
-      {{ settings.social_twitter_link | json }},
-      {{ settings.social_facebook_link | json }},
-      {{ settings.social_pinterest_link | json }},
-      {{ settings.social_instagram_link | json }},
-      {{ settings.social_tumblr_link | json }},
-      {{ settings.social_snapchat_link | json }},
-      {{ settings.social_youtube_link | json }},
-      {{ settings.social_vimeo_link | json }}
+      {%- assign same_as_first = true -%}
+      {%- if settings.social_twitter_link != blank -%}{{ settings.social_twitter_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_facebook_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_facebook_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_pinterest_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_pinterest_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_instagram_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_instagram_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_tumblr_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_tumblr_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_snapchat_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_snapchat_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_youtube_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_youtube_link | json }}{%- assign same_as_first = false -%}{%- endif -%}
+      {%- if settings.social_vimeo_link != blank -%}{%- unless same_as_first -%},{%- endunless -%}{{ settings.social_vimeo_link | json }}{%- endif -%}
     ],
     "url": {{ shop.url | append: page.url | json }}
   }
